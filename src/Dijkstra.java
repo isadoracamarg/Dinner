@@ -4,7 +4,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class Dijkstra extends Thread {
 
     private static final int FILOSOFOS = 5;
-    private static final int ITERACOES = 100; // Número de vezes que cada filósofo vai comer
+    private static final int ITERACOES = 100;
     private static final Lock[] garfos = new Lock[FILOSOFOS];
     private static final int[] contagemComidas = new int[FILOSOFOS];
     private static final Thread[] filosofosThreads = new Thread[FILOSOFOS];
@@ -23,31 +23,31 @@ public class Dijkstra extends Thread {
                     System.out.println(id + " senta");
 
                     boolean conseguiuGarfos = false;
-                    int tentativas = 0;  // Limitar o número de tentativas
+                    int tentativas = 0;
 
-                    while (!conseguiuGarfos && tentativas < 5) {  // Max 5 tentativas
+                    while (!conseguiuGarfos && tentativas < 5) {
                         tentativas++;
                         if (id % 2 == 0) {
                             if (garfos[id].tryLock()) {
                                 if (garfos[(id + 1) % FILOSOFOS].tryLock()) {
-                                    conseguiuGarfos = true;  // Conseguiu pegar os dois garfos
+                                    conseguiuGarfos = true;
                                 } else {
-                                    garfos[id].unlock();  // Não conseguiu o segundo garfo, libera o primeiro
+                                    garfos[id].unlock();
                                 }
                             }
                         } else {
                             if (garfos[(id + 1) % FILOSOFOS].tryLock()) {
                                 if (garfos[id].tryLock()) {
-                                    conseguiuGarfos = true;  // Conseguiu pegar os dois garfos
+                                    conseguiuGarfos = true;
                                 } else {
-                                    garfos[(id + 1) % FILOSOFOS].unlock();  // Não conseguiu o primeiro garfo, libera o segundo
+                                    garfos[(id + 1) % FILOSOFOS].unlock();
                                 }
                             }
                         }
 
                         if (!conseguiuGarfos) {
                             try {
-                                Thread.sleep(10);  // Espera um pouco antes de tentar novamente
+                                Thread.sleep(10);
                             } catch (InterruptedException e) {
                                 Thread.currentThread().interrupt();
                             }
@@ -58,20 +58,18 @@ public class Dijkstra extends Thread {
                         contagemComidas[id]++;
                         System.out.println(id + " comeu");
 
-                        // Libera os garfos após comer
                         garfos[id].unlock();
                         garfos[(id + 1) % FILOSOFOS].unlock();
                         System.out.println(id + " liberou os garfos");
                     }
                 }
             });
-            filosofosThreads[i].start(); // Inicia a thread do filósofo
+            filosofosThreads[i].start();
         }
 
-        // Aguardar o término dos filósofos
         for (int i = 0; i < FILOSOFOS; i++) {
             try {
-                filosofosThreads[i].join(); // Espera a thread do filósofo terminar
+                filosofosThreads[i].join();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
@@ -80,7 +78,6 @@ public class Dijkstra extends Thread {
         long tempoFim = System.currentTimeMillis();
         long tempoTotal = tempoFim - tempoInicio;
 
-        // Mostrar resultados
         for (int i = 0; i < FILOSOFOS; i++) {
             System.out.println("Filósofo " + i + " comeu " + contagemComidas[i] + " vezes.");
         }
